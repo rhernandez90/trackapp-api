@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using WebApi.Services;
 using WebApi.Entities;
 using WebApi.Models;
+using WebApi.Services.UserService;
 
 namespace WebApi.Controllers
 {
@@ -30,7 +31,7 @@ namespace WebApi.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = "Role.Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -43,7 +44,7 @@ namespace WebApi.Controllers
         {
             // only allow admins to access other user records
             var currentUserId = int.Parse(User.Identity.Name);
-            if (id != currentUserId && !User.IsInRole(Role.Admin))
+            if (id != currentUserId && !User.IsInRole("Role.Admin"))
                 return Forbid();
 
             var user =  _userService.GetById(id);
