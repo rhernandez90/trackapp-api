@@ -33,13 +33,8 @@ namespace WebApi.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = "Role.Admin")]
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var users =  _userService.GetAll();
-            return Ok(users);
-        }
+
+
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
@@ -71,6 +66,14 @@ namespace WebApi.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [Authorize(Roles = "Role.Admin")]
+        [HttpGet("")]
+        public IActionResult GetAll()
+        {
+            var users = _userService.GetAll();
+            return Ok(users);
         }
     }
 }

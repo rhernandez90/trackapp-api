@@ -75,9 +75,15 @@ namespace WebApi.Services.UserService
             return userDto;
         }
 
-        public IEnumerable<User> GetAll()
+        public List<RegisterUserDto> GetAll()
         {
-            return _context.Users;
+            var users = _context.Users.Select( x => new RegisterUserDto
+            {
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Username = x.Username
+            }).ToList();
+            return users;
         }
 
         public User GetById(int id)

@@ -5,10 +5,10 @@ using WebApi.Services.UserService.Dto;
 namespace WebApi.Services.UserService
 {
 
-        public interface IUserService
+    public interface IUserService
     {
         UserDto Authenticate(string username, string password);
-        IEnumerable<User> GetAll();
+        List<RegisterUserDto> GetAll();
         User GetById(int id);
         User Create(RegisterUserDto user);
         void Update(User user, string password = null);
