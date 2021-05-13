@@ -11,6 +11,7 @@ namespace WebApi.Helpers
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<RoleUser> RoleUsers { get; set; }
+        public DbSet<Persons> Persons { get; set; }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
