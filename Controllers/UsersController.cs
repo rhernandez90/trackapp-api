@@ -4,6 +4,8 @@ using WebApi.Services;
 using WebApi.Entities;
 using WebApi.Models;
 using WebApi.Services.UserService;
+using WebApi.Services.UserService.Dto;
+using System;
 
 namespace WebApi.Controllers
 {
@@ -53,6 +55,22 @@ namespace WebApi.Controllers
                 return NotFound();
 
             return Ok(user);
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterUserDto UserData)
+        {
+            try
+            {
+                _userService.Create(UserData);
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

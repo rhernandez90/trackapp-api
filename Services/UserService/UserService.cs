@@ -85,21 +85,27 @@ namespace WebApi.Services.UserService
             return _context.Users.Find(id);
         }
 
-        public User Create(User user, string password,string roleName)
+        public User Create(RegisterUserDto UserData)
         {
+            var user = new User();
+            user.FirstName = UserData.FirstName;
+            user.LastName = UserData.LastName;
+            user.Username = UserData.Username;
+           
+
             // validation
-            if (string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(UserData.Password))
                 throw new AppException("Password is required");
 
             if (_context.Users.Any(x => x.Username == user.Username))
                 throw new AppException("Username \"" + user.Username + "\" is already taken");
 
-            var role = _context.Roles.FirstOrDefault(x => x.RoleName == roleName);
+            var role = _context.Roles.FirstOrDefault(x => x.RoleName == UserData.Role);
             if(role == null)
-                throw new AppException("Role '" + roleName + "' does not exist");
+                throw new AppException("Role '" + UserData.Role + "' does not exist");
 
             byte[] passwordHash, passwordSalt;
-            CreatePasswordHash(password, out passwordHash, out passwordSalt);
+            CreatePasswordHash(UserData.Password, out passwordHash, out passwordSalt);
 
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
