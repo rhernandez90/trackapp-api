@@ -13,6 +13,7 @@ namespace WebApi.Helpers
         public DbSet<RoleUser> RoleUsers { get; set; }
         public DbSet<Persons> Persons { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
+        public DbSet<PersonTasks> PersonTasks { get; set; }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {

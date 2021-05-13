@@ -8,7 +8,7 @@ using WebApi.Helpers.Enums;
 
 namespace WebApi.Entities
 {
-    public class Tasks
+    public class Tasks : BaseEntity
     {
         public int Id { get; set; }
 
