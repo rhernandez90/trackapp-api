@@ -12,7 +12,7 @@ namespace WebApi.Entities
         public int PersonId { get; set; }
         public int TaskId { get; set; }
 
-        [ForeignKey("PersonId ")]
+        [ForeignKey("PersonId")]
         public Persons Person { get; set; }
 
         [ForeignKey("TaskId")]

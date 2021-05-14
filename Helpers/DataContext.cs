@@ -14,6 +14,7 @@ namespace WebApi.Helpers
         public DbSet<Persons> Persons { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
         public DbSet<PersonTasks> PersonTasks { get; set; }
+        public DbSet<Project> Projects { get; set; }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {

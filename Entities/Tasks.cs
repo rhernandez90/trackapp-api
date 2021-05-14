@@ -27,6 +27,11 @@ namespace WebApi.Entities
 
         public String Note { get; set; }
 
+        public int ProjectId { get; set; }
+
+        [ForeignKey("ProjectId")]
+        public Project Project { get; set; }
+
         public Tasks()
         {
             Status = StatusEnum.Pending;
