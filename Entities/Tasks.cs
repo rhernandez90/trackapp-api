@@ -19,11 +19,13 @@ namespace WebApi.Entities
 
         public StatusEnum Status { get; set; }
 
-        [Column(TypeName="Date")]
         public DateTime StartDate { get; set; }
-
-        [Column(TypeName = "Date")]
+   
         public DateTime EndDate { get; set; }
+
+        public DateTime CompleteDate { get; set; }
+
+        public String Note { get; set; }
 
         public Tasks()
         {
