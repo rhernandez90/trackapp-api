@@ -66,8 +66,11 @@ namespace WebApi.Controllers
         {
             try
             {
-                await _projectService.Update(Id,ProjectData);
-                return Ok();
+                var project = await _projectService.Update(Id,ProjectData);
+                if (project == null)
+                    return NotFound();
+
+                return Ok(project);
             }
             catch (Exception ex)
             {
@@ -81,8 +84,11 @@ namespace WebApi.Controllers
         {
             try
             {
-                await _projectService.Delete(Id);
-                return Ok();
+                var project = await _projectService.Delete(Id);
+                if (project == null)
+                    return NotFound();
+
+                return Ok(project);
             }
             catch (Exception ex)
             {
