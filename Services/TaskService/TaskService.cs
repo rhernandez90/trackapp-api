@@ -26,22 +26,11 @@ namespace WebApi.Services.TaskService
         }
 
 
-        public async Task<RequestResponseDto> Create(TaskDto taskData)
+        public async Task<RequestResponseDto> Create(CreateTaskDto taskData)
         {
-            var task = new Tasks()
-            {
-                TaskName = taskData.TaskName,
-                Description = taskData.Description,
-                ProjectId = taskData.ProjectId,
-                StartDate = taskData.StartDate,
-                EndDate = taskData.EndDate,
-                Note = taskData.Note,
-
-            };
-
+            var task = _mapper.Map<Tasks>(taskData); 
             await _context.Tasks.AddAsync(task);
             await _context.SaveChangesAsync();
-
             return new RequestResponseDto { Key = task.Id, Data = task };
         }
 
@@ -72,7 +61,7 @@ namespace WebApi.Services.TaskService
             if (task == null)
                 return null;
 
-            return new RequestResponseDto { Data = task }; ;
+            return new RequestResponseDto { Data = task };
         }
 
         public async Task<RequestResponseDto> Update(int id, TaskDto taskData)
@@ -80,14 +69,7 @@ namespace WebApi.Services.TaskService
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
             {
-                task.TaskName = taskData.TaskName;
-                task.Description = taskData.Description;
-                task.ProjectId = taskData.ProjectId;
-                task.StartDate = taskData.StartDate;
-                task.EndDate = taskData.EndDate;
-                task.Note = taskData.Note;
-                task.Status = taskData.Status;
-                task.CompleteDate = task.CompleteDate;
+                task = _mapper.Map<Tasks>(taskData);
                 _context.Tasks.Update(task);
                 await _context.SaveChangesAsync();
 
