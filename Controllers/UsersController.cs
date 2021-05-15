@@ -24,10 +24,12 @@ namespace WebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]AuthenticateModel model)
+        public async Task<IActionResult> AuthenticateAsync([FromBody]AuthenticateModel model)
         {
-            var user = _userService.Authenticate(model.Username, model.Password);
+            if(string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
+                return BadRequest(new { message = "Username or password is incorrect" });
 
+            var user = await _userService.Authenticate(model.Username, model.Password);
             if (user == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
 

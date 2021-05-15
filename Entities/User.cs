@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Entities
 {
@@ -10,6 +11,11 @@ namespace WebApi.Entities
         public string Username { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
+
+        public int? PersonId { get; set; }
+
+        [ForeignKey("PersonId")]
+        public Persons Person { get; set; }
         public ICollection<RoleUser> RoleUsers { get; set; }
     }
 }
