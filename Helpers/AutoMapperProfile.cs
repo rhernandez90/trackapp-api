@@ -12,6 +12,9 @@ namespace WebApi.Helpers
         public AutoMapperProfile()
         {
 
+            CreateMap<RegisterUserDto, User>()
+                .ReverseMap();
+
             CreateMap<User, UserDto>()
                 .ReverseMap();
 

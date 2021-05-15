@@ -10,6 +10,10 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using WebApi.Services.UserService.Dto;
+using WebApi.Services.PersonService;
+using System.Threading.Tasks;
+using WebApi.Services.PersonService.Dto;
+using AutoMapper;
 
 namespace WebApi.Services.UserService
 {
@@ -19,63 +23,35 @@ namespace WebApi.Services.UserService
     {
         private DataContext _context;
         private readonly AppSettings _appSettings;
-        public UserService(DataContext context, IOptions<AppSettings> appSettings)
+        private readonly IPersonService _personService;
+        private readonly IMapper _mapper;
+        public UserService(
+            DataContext context, 
+            IOptions<AppSettings> appSettings, 
+            IPersonService personService,
+            IMapper mapper
+            )
         {
             _context = context;
             _appSettings = appSettings.Value;
+            _personService = personService;
+            _mapper = mapper;
         }
 
-        public UserDto Authenticate(string username, string password)
+        public async Task<UserDto> Authenticate(string username, string password)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var roles = await GetRolesByUser(username);
+
+            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt) || user == null)
                 return null;
 
-            var user = _context.Users
-                .Include( c => c.RoleUsers)
-                .ThenInclude( r => r.Role)
-                .SingleOrDefault(x => x.Username == username);
-
-            string[] roles = new string[]{}; 
-            if(user.RoleUsers.Any())
-                roles = user.RoleUsers.Select( x => x.Role ).Select( S => S.RoleName).ToArray();
-
-            if (user == null)
-                return null;
-
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return null;
-
-
-
-            var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Name, user.Id.ToString()));
-            foreach (var item in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, item));
-            }
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            // authentication successful
-            var userDto = new UserDto();
-            userDto.Id = user.Id;
-            userDto.FirstName  = user.FirstName;
-            userDto.LastName   = user.LastName;
-            userDto.Username   = user.Username;
-            userDto.Token = tokenString;
-            return userDto;
+            var userData = await CreateToken(roles, user);
+            return userData;
         }
 
-        public List<RegisterUserDto> GetAll()
+        public async Task<List<RegisterUserDto>> GetAll()
         {
             var users = _context.Users.Select( x => new RegisterUserDto
             {
@@ -86,35 +62,23 @@ namespace WebApi.Services.UserService
             return users;
         }
 
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
-            return _context.Users.Find(id);
+            return await _context.Users.FindAsync(id);
         }
 
-        public User Create(RegisterUserDto UserData)
+        public async Task<User> Create(RegisterUserDto UserData)
         {
-            var user = new User();
-            user.FirstName = UserData.FirstName;
-            user.LastName = UserData.LastName;
-            user.Username = UserData.Username;
-           
-
-            // validation
-            if (string.IsNullOrWhiteSpace(UserData.Password))
-                throw new AppException("Password is required");
-
-            if (_context.Users.Any(x => x.Username == user.Username))
-                throw new AppException("Username \"" + user.Username + "\" is already taken");
-
             var role = _context.Roles.FirstOrDefault(x => x.RoleName == UserData.Role);
-            if(role == null)
-                throw new AppException("Role '" + UserData.Role + "' does not exist");
+            UserValidation(UserData, role);
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(UserData.Password, out passwordHash, out passwordSalt);
 
+            var user = _mapper.Map<User>(UserData);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+
 
             _context.Users.Add(user);
             _context.SaveChanges();
@@ -125,35 +89,50 @@ namespace WebApi.Services.UserService
             };
             _context.RoleUsers.Add(roleUser);
             _context.SaveChanges();
+            await CreateRelatedPerson(user);
 
             return user;
         }
 
-        public void Update(User userParam, string password = null)
+        private async Task CreateRelatedPerson(User user)
         {
-            var user = _context.Users.Find(userParam.Id);
+            var person = new PersonDto() { 
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            };
+            await _personService.Create(person);
+            
+            user.PersonId = person.Id;
+            _context.Users.Update(user);
+            _context.SaveChanges();
+        }
+
+
+
+
+        public async Task Update(User userParam, string password = null)
+        {
+            var user = await _context.Users.FindAsync(userParam.Id);
 
             if (user == null)
                 throw new AppException("User not found");
 
-            // update username if it has changed
+            
             if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
             {
-                // throw error if the new username is already taken
+               
                 if (_context.Users.Any(x => x.Username == userParam.Username))
                     throw new AppException("Username " + userParam.Username + " is already taken");
 
                 user.Username = userParam.Username;
             }
 
-            // update user properties if provided
             if (!string.IsNullOrWhiteSpace(userParam.FirstName))
                 user.FirstName = userParam.FirstName;
 
             if (!string.IsNullOrWhiteSpace(userParam.LastName))
                 user.LastName = userParam.LastName;
 
-            // update password if provided
             if (!string.IsNullOrWhiteSpace(password))
             {
                 byte[] passwordHash, passwordSalt;
@@ -167,9 +146,9 @@ namespace WebApi.Services.UserService
             _context.SaveChanges();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
                 _context.Users.Remove(user);
@@ -177,7 +156,39 @@ namespace WebApi.Services.UserService
             }
         }
 
+
+        public async Task<string[]> GetRolesByUser(string username)
+        {
+            string[] roles = new string[] { };
+            var user = await _context.Users
+            .Include(c => c.RoleUsers)
+            .ThenInclude(r => r.Role)
+            .SingleOrDefaultAsync(x => x.Username == username);
+
+            
+
+            if (user.RoleUsers.Any())
+                roles = user.RoleUsers.Select(x => x.Role).Select(S => S.RoleName).ToArray();
+            return roles;
+        }
+
+
         // private helper methods
+        private bool UserValidation(RegisterUserDto UserData, Role role)
+        {
+            if (string.IsNullOrWhiteSpace(UserData.Password))
+                throw new AppException("Password is required");
+
+            if (_context.Users.Any(x => x.Username == UserData.Username))
+                throw new AppException("Username \"" + UserData.Username + "\" is already taken");
+
+            
+            if (role == null)
+                throw new AppException("Role '" + UserData.Role + "' does not exist");
+
+            return true;
+        }
+
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
@@ -217,6 +228,40 @@ namespace WebApi.Services.UserService
             return int.Parse(UserId);
         }
 
+
+        private async Task<UserDto> CreateToken(string[] roles, User user)
+        {
+            var claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, user.Id.ToString()));
+
+            foreach (var item in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, item));
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            // authentication successful
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                Token = tokenString
+            };
+
+            return userDto;
+        }
 
     }
 }
