@@ -80,7 +80,6 @@ namespace WebApi.Services.ProjectService
 
                 return new RequestResponseDto { Key = project.Id, Data = project };
             }
-
             return null;
         }
 

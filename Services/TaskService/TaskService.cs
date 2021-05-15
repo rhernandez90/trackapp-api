@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,29 +40,66 @@ namespace WebApi.Services.TaskService
             return new RequestResponseDto { Key = task.Id, Data = task };
         }
 
-        Task<RequestResponseDto> ITaskService.Create(TaskDto taksData)
+
+        public async Task<RequestResponseDto> Delete(int id)
         {
-            throw new NotImplementedException();
+            var task = await _context.Tasks.FindAsync(id);
+            if (task!= null)
+            {
+                _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+                return new RequestResponseDto { Key = id, Message = "Removed" };
+            }
+
+            return null;
         }
 
-        Task<RequestResponseDto> ITaskService.Delete(int id)
+        public async Task<RequestResponseDto> GetAll()
         {
-            throw new NotImplementedException();
+            var tasks = await _context.Tasks
+            .Select(x => new TaskDto
+            {
+                TaskName = x.TaskName,
+                Description = x.Description,
+                Status = x.Status,
+                StartDate = x.StartDate,
+                EndDate = x.EndDate,
+                Note = x.Note,
+                ProjectId = x.ProjectId
+            })
+            .ToListAsync();
+
+            return new RequestResponseDto { Data = tasks };  
         }
 
-        Task<RequestResponseDto> ITaskService.GetAll()
+        public async  Task<RequestResponseDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+                return null;
+
+            return new RequestResponseDto { Data = task }; ;
         }
 
-        Task<RequestResponseDto> ITaskService.GetById(int id)
+        public async Task<RequestResponseDto> Update(int id, TaskDto taskData)
         {
-            throw new NotImplementedException();
-        }
+            var task = await _context.Tasks.FindAsync(id);
+            if (task != null)
+            {
+                task.TaskName = taskData.TaskName;
+                task.Description = taskData.Description;
+                task.ProjectId = taskData.ProjectId;
+                task.StartDate = taskData.StartDate;
+                task.EndDate = taskData.EndDate;
+                task.Note = taskData.Note;
+                task.Status = taskData.Status;
+                task.CompleteDate = task.CompleteDate;
+                _context.Tasks.Update(task);
+                await _context.SaveChangesAsync();
 
-        Task<RequestResponseDto> ITaskService.Update(int id, TaskDto taskData)
-        {
-            throw new NotImplementedException();
+                return new RequestResponseDto { Key = task.Id, Data = task };
+            }
+            return null;
         }
     }
 }
