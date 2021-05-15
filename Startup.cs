@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using WebApi.Services.UserService;
 using WebApi.Services.ProjectService;
 using Newtonsoft.Json;
+using AutoMapper;
+using System;
+using WebApi.Services.TaskService;
 
 namespace WebApi
 {
@@ -31,7 +34,7 @@ namespace WebApi
 
             services.AddCors();
             services.AddControllers();
-
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -80,6 +83,7 @@ namespace WebApi
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<ITaskService, TaskService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

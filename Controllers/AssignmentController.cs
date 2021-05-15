@@ -4,72 +4,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApi.Entities;
-using WebApi.Services.ProjectService;
-using WebApi.Services.ProjectService.Dto;
+using WebApi.Services.TaskService;
+using WebApi.Services.TaskService.Dto;
 
 namespace WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
-    public class ProjectController : ControllerBase
+    [Route("controller")]
+    public class AssignmentController : ControllerBase
     {
-        private readonly IProjectService _projectService;
+        private readonly ITaskService _tasksService;
 
-        public ProjectController(IProjectService projectService)
+
+        public AssignmentController(ITaskService tasksService)
         {
-            _projectService = projectService;
+            _tasksService = tasksService;
         }
 
-        [Authorize(Roles = "Role.Admin")]
+        [Authorize(Roles = "Role.Admin,Role.User")]
         [HttpPost("")]
-        public async Task<ActionResult> Create([FromBody] ProjectDto ProjectData)
+        public async Task<ActionResult> Create([FromBody] TaskDto taskData)
         {
             try
             {
-                var project = await _projectService.Create(ProjectData);
-                return Ok(project);
+                var task = await _tasksService.Create(taskData);
+                return Ok(task);
                 //return CreatedAtRoute("GetDocument", new { guid = project }, project);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
 
         }
 
-        [Authorize]
+        [Authorize(Roles = "Role.Admin")]
         [HttpGet("")]
         public async Task<ActionResult> GetAll()
         {
-            var projects = await _projectService.GetAll();
-            return Ok(projects);
+            var tasks = await _tasksService.GetAll();
+            return Ok(tasks);
         }
 
         [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var project = await _projectService.GetById(id);
-            if (project == null)
+            var task = await _tasksService.GetById(id);
+            if (task == null)
                 return NotFound();
 
-            return Ok(project);
+            return Ok(task);
         }
 
-
-        [Authorize(Roles = "Role.Admin")]
+        [Authorize]
         [HttpPut("{Id}")]
-        public async Task<ActionResult> Update(int Id, ProjectDto ProjectData)
+        public async Task<ActionResult> Update(int Id, TaskDto taskData)
         {
             try
             {
-                var project = await _projectService.Update(Id,ProjectData);
-                if (project == null)
+                var task = await _tasksService.Update(Id, taskData);
+                if (task == null)
                     return NotFound();
 
-                return Ok(project);
+                return Ok(task);
             }
             catch (Exception ex)
             {
@@ -83,11 +82,11 @@ namespace WebApi.Controllers
         {
             try
             {
-                var project = await _projectService.Delete(Id);
-                if (project == null)
+                var task = await _tasksService.Delete(Id);
+                if (task == null)
                     return NotFound();
 
-                return Ok(project);
+                return Ok(task);
             }
             catch (Exception ex)
             {
@@ -97,4 +96,5 @@ namespace WebApi.Controllers
 
 
     }
+
 }
