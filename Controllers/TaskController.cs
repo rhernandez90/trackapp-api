@@ -24,13 +24,12 @@ namespace WebApi.Controllers
 
         [Authorize(Roles = "Role.Admin,Role.User")]
         [HttpPost("")]
-        public async Task<ActionResult> Create([FromBody] TaskDto taskData)
+        public async Task<ActionResult> Create([FromBody] CreateTaskDto taskData)
         {
             try
             {
                 var task = await _tasksService.Create(taskData);
                 return Ok(task);
-                //return CreatedAtRoute("GetDocument", new { guid = project }, project);
             }
             catch (Exception ex)
             {

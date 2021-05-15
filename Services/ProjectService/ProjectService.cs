@@ -7,7 +7,7 @@ using WebApi.Helpers;
 using WebApi.Services.ProjectService.Dto;
 
 namespace WebApi.Services.ProjectService
-{
+{   
     public class ProjectService : IProjectService
     {
         private readonly DataContext _context;
