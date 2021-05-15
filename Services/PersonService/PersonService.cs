@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,22 +34,44 @@ namespace WebApi.Services.PersonService
 
         public async Task<RequestResponseDto> Delete(int id)
         {
-            throw new NotImplementedException();
+            var person = await _context.Persons.FindAsync(id);
+            if (person != null)
+            {
+                _context.Persons.Remove(person);
+                await _context.SaveChangesAsync();
+                return new RequestResponseDto { Key = id, Message = "Removed" };
+            }
+            return null;
         }
 
         public async Task<RequestResponseDto> GetAll()
         {
-            throw new NotImplementedException();
+            var person = _context.Persons;
+            var personList = _mapper.Map<List<PersonDto>>(person);
+            return new RequestResponseDto { Data = personList };
         }
 
         public async Task<RequestResponseDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var person = await _context.Persons.FindAsync(id);
+            if (person == null)
+                return null;
+
+            return new RequestResponseDto { Data = person };
         }
 
-        public async Task<RequestResponseDto> Update(int id, PersonDto taskData)
+        public async Task<RequestResponseDto> Update(int id, PersonDto personData)
         {
-            throw new NotImplementedException();
+            var person = await _context.Persons.FindAsync(id);
+            if (person != null)
+            {
+                person = _mapper.Map<Persons>(personData);
+                _context.Persons.Update(person);
+                await _context.SaveChangesAsync();
+
+                return new RequestResponseDto { Key = person.Id, Data = person };
+            }
+            return null;
         }
     }
 }

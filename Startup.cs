@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using AutoMapper;
 using System;
 using WebApi.Services.TaskService;
+using WebApi.Services.PersonService;
 
 namespace WebApi
 {
@@ -84,6 +85,7 @@ namespace WebApi
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<ITaskService, TaskService>();
+            services.AddScoped<IPersonService, PersonService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -61,7 +61,7 @@ namespace WebApi.Services.TaskService
             if (task == null)
                 return null;
 
-            return new RequestResponseDto { Data = task }; ;
+            return new RequestResponseDto { Data = task };
         }
 
         public async Task<RequestResponseDto> Update(int id, TaskDto taskData)
