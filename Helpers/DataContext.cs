@@ -33,9 +33,6 @@ namespace WebApi.Helpers
             options.UseSqlServer(Configuration.GetConnectionString("WebApiDatabase"));
         }
 
-        protected override  void OnModelCreating(ModelBuilder modeBuilder){
- 
-        }
 
         private void OnBeforeSaving()
         {
@@ -46,8 +43,7 @@ namespace WebApi.Helpers
 
             foreach (var entry in entries)
             {
-                // for entities that inherit from BaseEntity,
-                // set UpdatedOn / CreatedOn appropriately
+ 
                 if (entry.Entity is BaseEntity trackable)
                 {
                     switch (entry.State)
@@ -55,9 +51,6 @@ namespace WebApi.Helpers
                         case EntityState.Modified:
                             // set the updated date to "now"
                             trackable.UpdatedOn = utcNow;
-
-                            // mark property as "don't touch"
-                            // we don't want to update on a Modify operation
                             entry.Property("CreatedOn").IsModified = false;
                             break;
 

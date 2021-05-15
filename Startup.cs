@@ -9,6 +9,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Threading.Tasks;
 using WebApi.Services.UserService;
+using WebApi.Services.ProjectService;
+using Newtonsoft.Json;
 
 namespace WebApi
 {
@@ -30,9 +32,12 @@ namespace WebApi
             services.AddCors();
             services.AddControllers();
 
+
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
+
+
 
             // configure jwt authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
@@ -74,6 +79,7 @@ namespace WebApi
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IProjectService, ProjectService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
