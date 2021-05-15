@@ -10,6 +10,9 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using WebApi.Services.UserService.Dto;
+using WebApi.Services.PersonService;
+using System.Threading.Tasks;
+using WebApi.Services.PersonService.Dto;
 
 namespace WebApi.Services.UserService
 {
@@ -19,13 +22,15 @@ namespace WebApi.Services.UserService
     {
         private DataContext _context;
         private readonly AppSettings _appSettings;
-        public UserService(DataContext context, IOptions<AppSettings> appSettings)
+        private readonly IPersonService _personService;
+        public UserService(DataContext context, IOptions<AppSettings> appSettings, IPersonService personService)
         {
             _context = context;
             _appSettings = appSettings.Value;
+            _personService = personService;
         }
 
-        public UserDto Authenticate(string username, string password)
+        public async Task<UserDto> Authenticate(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return null;
@@ -75,7 +80,7 @@ namespace WebApi.Services.UserService
             return userDto;
         }
 
-        public List<RegisterUserDto> GetAll()
+        public async Task<List<RegisterUserDto>> GetAll()
         {
             var users = _context.Users.Select( x => new RegisterUserDto
             {
@@ -86,35 +91,34 @@ namespace WebApi.Services.UserService
             return users;
         }
 
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
-            return _context.Users.Find(id);
+            return await _context.Users.FindAsync(id);
         }
 
-        public User Create(RegisterUserDto UserData)
+        public async Task<User> Create(RegisterUserDto UserData)
         {
-            var user = new User();
-            user.FirstName = UserData.FirstName;
-            user.LastName = UserData.LastName;
-            user.Username = UserData.Username;
-           
-
-            // validation
             if (string.IsNullOrWhiteSpace(UserData.Password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Username == user.Username))
-                throw new AppException("Username \"" + user.Username + "\" is already taken");
+            if (_context.Users.Any(x => x.Username == UserData.Username))
+                throw new AppException("Username \"" + UserData.Username + "\" is already taken");
 
             var role = _context.Roles.FirstOrDefault(x => x.RoleName == UserData.Role);
-            if(role == null)
+            if (role == null)
                 throw new AppException("Role '" + UserData.Role + "' does not exist");
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(UserData.Password, out passwordHash, out passwordSalt);
 
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+            var user = new User
+            {
+                FirstName = UserData.FirstName,
+                LastName = UserData.LastName,
+                Username = UserData.Username,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
+            };
 
             _context.Users.Add(user);
             _context.SaveChanges();
@@ -125,13 +129,25 @@ namespace WebApi.Services.UserService
             };
             _context.RoleUsers.Add(roleUser);
             _context.SaveChanges();
+            await CreateRelatedPerson(user);
 
             return user;
         }
 
-        public void Update(User userParam, string password = null)
+        private async Task CreateRelatedPerson(User user)
         {
-            var user = _context.Users.Find(userParam.Id);
+            var person = new PersonDto() { 
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+            };
+
+            await _personService.Create(person);
+        }
+
+
+        public async Task Update(User userParam, string password = null)
+        {
+            var user = await _context.Users.FindAsync(userParam.Id);
 
             if (user == null)
                 throw new AppException("User not found");
@@ -167,9 +183,9 @@ namespace WebApi.Services.UserService
             _context.SaveChanges();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
                 _context.Users.Remove(user);

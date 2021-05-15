@@ -6,6 +6,7 @@ using WebApi.Models;
 using WebApi.Services.UserService;
 using WebApi.Services.UserService.Dto;
 using System;
+using System.Threading.Tasks;
 
 namespace WebApi.Controllers
 {
@@ -37,13 +38,13 @@ namespace WebApi.Controllers
 
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
             var currentUserId = int.Parse(User.Identity.Name);
             if (id != currentUserId && !User.IsInRole("Role.Admin"))
                 return Forbid();
 
-            var user =  _userService.GetById(id);
+            var user =  await _userService.GetById(id);
 
             if (user == null)
                 return NotFound();
@@ -54,11 +55,11 @@ namespace WebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterUserDto UserData)
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserDto UserData)
         {
             try
             {
-                _userService.Create(UserData);
+                await _userService.Create(UserData);
                 return Ok();
             }
             catch(Exception ex)
@@ -69,9 +70,9 @@ namespace WebApi.Controllers
 
         [Authorize(Roles = "Role.Admin")]
         [HttpGet("")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAllAsync()
         {
-            var users = _userService.GetAll();
+            var users = await _userService.GetAll();
             return Ok(users);
         }
     }

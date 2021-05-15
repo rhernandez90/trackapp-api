@@ -12,11 +12,11 @@ namespace WebApi.Entities
         public int Id { get; set; }
 
         [Required]
-        [Column(TypeName ="varchar(20)")]
+        [Column(TypeName ="varchar(25)")]
         public string FirstName { get; set; }
 
         [Required]
-        [Column(TypeName = "varchar(20)")]
+        [Column(TypeName = "varchar(25)")]
         public string LastName { get; set; }
 
         [Required]
