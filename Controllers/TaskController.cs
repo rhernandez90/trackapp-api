@@ -11,13 +11,13 @@ namespace WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("controller")]
-    public class AssignmentController : ControllerBase
+    [Route("[controller]")]
+    public class TaskController : ControllerBase
     {
         private readonly ITaskService _tasksService;
 
 
-        public AssignmentController(ITaskService tasksService)
+        public TaskController(ITaskService tasksService)    
         {
             _tasksService = tasksService;
         }
@@ -34,7 +34,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = $"{ex.Message}, {ex.InnerException}" });
             }
 
         }

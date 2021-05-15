@@ -7,7 +7,7 @@ namespace WebApi.Helpers.Enums
 {
     public enum StatusEnum
     {
-        Pending,
+        Pending = 1,
         InProgress,
         Done,
         rejected

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,15 @@ namespace WebApi.Services.TaskService
 
     public class TaskService : ITaskService
     {
+        private readonly IMapper _mapper;
         private readonly DataContext _context;
         public TaskService(
-            DataContext context    
+            DataContext context,
+            IMapper mapper
         )
         {
             _context = context;
+            _mapper = mapper;
         }
 
 
@@ -31,7 +35,8 @@ namespace WebApi.Services.TaskService
                 ProjectId = taskData.ProjectId,
                 StartDate = taskData.StartDate,
                 EndDate = taskData.EndDate,
-                Note = taskData.Note
+                Note = taskData.Note,
+
             };
 
             await _context.Tasks.AddAsync(task);
@@ -56,20 +61,9 @@ namespace WebApi.Services.TaskService
 
         public async Task<RequestResponseDto> GetAll()
         {
-            var tasks = await _context.Tasks
-            .Select(x => new TaskDto
-            {
-                TaskName = x.TaskName,
-                Description = x.Description,
-                Status = x.Status,
-                StartDate = x.StartDate,
-                EndDate = x.EndDate,
-                Note = x.Note,
-                ProjectId = x.ProjectId
-            })
-            .ToListAsync();
-
-            return new RequestResponseDto { Data = tasks };  
+            var tasks = _context.Tasks.Include(x => x.Project);
+            var taskList = _mapper.Map<List<TaskDto>>(tasks);
+            return new RequestResponseDto { Data = taskList };  
         }
 
         public async  Task<RequestResponseDto> GetById(int id)

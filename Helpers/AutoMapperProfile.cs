@@ -15,6 +15,7 @@ namespace WebApi.Helpers
                 .ReverseMap();
 
             CreateMap<Tasks, TaskDto>()
+                .ForMember( dest => dest.ProjectName, src => src.MapFrom( x => x.Project.Name))
                 .ReverseMap();
         }
     }
