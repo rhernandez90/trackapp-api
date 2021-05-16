@@ -77,5 +77,18 @@ namespace WebApi.Services.TaskService
             }
             return null;
         }
+
+        public async Task<RequestResponseDto> AssignTask(int taskId, int PersonId)
+        {
+            var personTask = new PersonTasks()
+            {
+                PersonId = PersonId,
+                TaskId = taskId
+            };
+
+            await _context.PersonTasks.AddAsync(personTask);
+            await _context.SaveChangesAsync();
+            return new RequestResponseDto { Key = personTask.Id, Data = personTask };
+        }
     }
 }

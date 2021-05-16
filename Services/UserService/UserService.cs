@@ -99,10 +99,11 @@ namespace WebApi.Services.UserService
             var person = new PersonDto() { 
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Email = ""
             };
-            await _personService.Create(person);
+            var newPerson = await _personService.Create(person);
             
-            user.PersonId = person.Id;
+            user.PersonId = newPerson.Key;
             _context.Users.Update(user);
             _context.SaveChanges();
         }
@@ -116,14 +117,11 @@ namespace WebApi.Services.UserService
 
             if (user == null)
                 throw new AppException("User not found");
-
             
             if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
             {
-               
                 if (_context.Users.Any(x => x.Username == userParam.Username))
                     throw new AppException("Username " + userParam.Username + " is already taken");
-
                 user.Username = userParam.Username;
             }
 

@@ -14,5 +14,6 @@ namespace WebApi.Services.TaskService
         Task<RequestResponseDto> GetById(int id);
         Task<RequestResponseDto> Delete(int id);
         Task<RequestResponseDto> Update(int id, TaskDto taskData);
+        Task<RequestResponseDto> AssignTask(int taskId, int PersonId);
     }
 }
