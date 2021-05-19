@@ -64,6 +64,34 @@ namespace WebApi.Services.TaskService
             return new RequestResponseDto { Data = task };
         }
 
+        public async Task<RequestResponseDto> GetByProject(int projectId)
+        {
+            var task = await _context.Tasks
+                .Include( x=> x.PersonTasks)
+                    .ThenInclude( x => x.Person)
+                .Where( x => x.ProjectId == projectId)
+                .Select( s => new { 
+                    s.Id,
+                    s.Description,
+                    s.TaskName,
+                    s.Status,
+                    s.StartDate,
+                    s.EndDate,
+                    s.CompleteDate,
+                    s.Note,
+                    persons = s.PersonTasks.Select( v => new { 
+                        v.Id,
+                        Name = v.Person.FirstName + " " + v.Person.LastName
+                    })
+                })
+                .ToListAsync();
+
+            if (task == null)
+                return null;
+
+            return new RequestResponseDto { Data = task };
+        }
+
         public async Task<RequestResponseDto> Update(int id, TaskDto taskData)
         {
             var task = await _context.Tasks.FindAsync(id);
@@ -76,6 +104,19 @@ namespace WebApi.Services.TaskService
                 return new RequestResponseDto { Key = task.Id, Data = task };
             }
             return null;
+        }
+
+        public async Task<RequestResponseDto> AssignTask(int taskId, int PersonId)
+        {
+            var personTask = new PersonTasks()
+            {
+                PersonId = PersonId,
+                TaskId = taskId
+            };
+
+            await _context.PersonTasks.AddAsync(personTask);
+            await _context.SaveChangesAsync();
+            return new RequestResponseDto { Key = personTask.Id, Data = personTask };
         }
     }
 }

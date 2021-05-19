@@ -93,6 +93,21 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("{TaskId}/AssignPerson/{PersonId}")]
+        public async Task<ActionResult> AssignTask(int TaskId, int PersonId)
+        {
+            try
+            {
+                var task = await _tasksService.AssignTask(TaskId,PersonId);
+                return Ok(task);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
 
     }
 

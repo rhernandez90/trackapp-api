@@ -31,7 +31,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddDbContext<DataContext>();
+            services.AddDbContext<DataContext>(ServiceLifetime.Transient);
 
             services.AddCors();
             services.AddControllers();

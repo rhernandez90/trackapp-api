@@ -38,13 +38,13 @@ namespace WebApi.Controllers
 
 
 
-
+        [Authorize(Roles = "Role.Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var currentUserId = int.Parse(User.Identity.Name);
-            if (id != currentUserId && !User.IsInRole("Role.Admin"))
-                return Forbid();
+            //var currentUserId = int.Parse(User.Identity.Name);
+            //if (id != currentUserId && !User.IsInRole("Role.Admin"))
+            //    return Forbid();
 
             var user =  await _userService.GetById(id);
 

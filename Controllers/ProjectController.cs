@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Services.ProjectService;
 using WebApi.Services.ProjectService.Dto;
+using WebApi.Services.TaskService;
 
 namespace WebApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace WebApi.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
+        private readonly ITaskService _taskService;
 
-        public ProjectController(IProjectService projectService)
+        public ProjectController(IProjectService projectService, ITaskService taskService)
         {
             _projectService = projectService;
+            _taskService = taskService;
         }
 
         [Authorize(Roles = "Role.Admin")]
@@ -43,8 +46,16 @@ namespace WebApi.Controllers
         [HttpGet("")]
         public async Task<ActionResult> GetAll()
         {
-            var projects = await _projectService.GetAll();
-            return Ok(projects);
+            try
+            {
+                var projects = await _projectService.GetAll();
+                return Ok(projects);
+            }
+            catch ( Exception exp )
+            {
+                return BadRequest(exp.Message);
+            }
+
         }
 
         [Authorize]
@@ -56,6 +67,17 @@ namespace WebApi.Controllers
                 return NotFound();
 
             return Ok(project);
+        }
+
+        [Authorize]
+        [HttpGet("{Id}/Tasks")]
+        public async Task<ActionResult> GetTasks(int id)
+        {
+            var tasks = await _taskService.GetByProject(id);
+            if (tasks == null)
+                return NotFound();
+
+            return Ok(tasks);
         }
 
 

@@ -13,6 +13,7 @@ namespace WebApi.Services.UserService
         Task<User> GetById(int id);
         Task<User> Create(RegisterUserDto user);
         Task Update(User user, string password = null);
+        Task<string[]> GetRolesByUser(string username);
         Task Delete(int id);
         int GetUserId();
     }
