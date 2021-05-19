@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,13 +36,13 @@ namespace WebApi.Services.ProjectService
 
         public async Task<RequestResponseDto> GetAll()
         {
-            var projects = _context.Projects
+            var projects = await _context.Projects
                 .Select( x => new ProjectDto {
                     Description = x.Description,
                     Name = x.Name,
                     Id = x.Id
             })
-            .ToList();
+            .ToListAsync();
 
             return new RequestResponseDto {  Data = projects };
         }

@@ -32,6 +32,7 @@ namespace WebApi.Entities
         [ForeignKey("ProjectId")]
         public Project Project { get; set; }
 
+        public List<PersonTasks> PersonTasks { get; set; }
         public Tasks()
         {
             Status = StatusEnum.Pending;
