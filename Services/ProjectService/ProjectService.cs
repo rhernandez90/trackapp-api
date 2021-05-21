@@ -25,7 +25,8 @@ namespace WebApi.Services.ProjectService
             var project = new Project()
             {
                 Description = ProjectData.Description,
-                Name = ProjectData.Name
+                Name = ProjectData.Name,
+                BackgroundColor = ProjectData.BackgroundColor
             };
 
             await _context.Projects.AddAsync(project);
@@ -40,7 +41,8 @@ namespace WebApi.Services.ProjectService
                 .Select( x => new ProjectDto {
                     Description = x.Description,
                     Name = x.Name,
-                    Id = x.Id
+                    Id = x.Id,
+                    BackgroundColor = x.BackgroundColor
             })
             .ToListAsync();
 
