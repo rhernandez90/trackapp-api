@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Entities;
+using WebApi.Helpers.Enums;
 using WebApi.Services.ProjectService;
 using WebApi.Services.ProjectService.Dto;
 using WebApi.Services.TaskService;
@@ -71,9 +72,20 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpGet("{Id}/Tasks")]
-        public async Task<ActionResult> GetTasks(int id)
+        public async Task<ActionResult> GetTasks(int id, StatusEnum status)
         {
-            var tasks = await _taskService.GetByProject(id);
+            var tasks = await _taskService.GetByProject(id, status);
+            if (tasks == null)
+                return NotFound();
+
+            return Ok(tasks);
+        }
+
+        [Authorize]
+        [HttpGet("{Id}/all-tasks")]
+        public async Task<ActionResult> GetAllTasks(int id)
+        {
+            var tasks = await _taskService.GetAllByProject(id);
             if (tasks == null)
                 return NotFound();
 

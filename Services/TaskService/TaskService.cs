@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
+using WebApi.Helpers.Enums;
 using WebApi.Services.TaskService.Dto;
 
 namespace WebApi.Services.TaskService
@@ -64,12 +65,12 @@ namespace WebApi.Services.TaskService
             return new RequestResponseDto { Data = task };
         }
 
-        public async Task<RequestResponseDto> GetByProject(int projectId)
+        public async Task<RequestResponseDto> GetByProject(int projectId, StatusEnum status)
         {
             var task = await _context.Tasks
                 .Include( x=> x.PersonTasks)
                     .ThenInclude( x => x.Person)
-                .Where( x => x.ProjectId == projectId)
+                .Where( x => x.ProjectId == projectId && x.Status == status)
                 .Select( s => new { 
                     s.Id,
                     s.Description,
@@ -80,6 +81,34 @@ namespace WebApi.Services.TaskService
                     s.CompleteDate,
                     s.Note,
                     persons = s.PersonTasks.Select( v => new { 
+                        v.Id,
+                        Name = v.Person.FirstName + " " + v.Person.LastName
+                    })
+                })
+                .ToListAsync();
+
+            if (task == null)
+                return null;
+
+            return new RequestResponseDto { Data = task };
+        }
+
+        public async Task<RequestResponseDto> GetAllByProject(int projectId)
+        {
+            var task = await _context.Tasks
+                .Include(x => x.PersonTasks)
+                    .ThenInclude(x => x.Person)
+                .Where(x => x.ProjectId == projectId)
+                .Select(s => new {
+                    s.Id,
+                    s.Description,
+                    s.TaskName,
+                    s.Status,
+                    s.StartDate,
+                    s.EndDate,
+                    s.CompleteDate,
+                    s.Note,
+                    persons = s.PersonTasks.Select(v => new {
                         v.Id,
                         Name = v.Person.FirstName + " " + v.Person.LastName
                     })
