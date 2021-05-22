@@ -17,6 +17,7 @@ namespace WebApi.Services.TaskService
     {
         private readonly IMapper _mapper;
         private readonly DataContext _context;
+        
         public TaskService(
             DataContext context,
             IMapper mapper
@@ -32,6 +33,10 @@ namespace WebApi.Services.TaskService
             var task = _mapper.Map<Tasks>(taskData); 
             await _context.Tasks.AddAsync(task);
             await _context.SaveChangesAsync();
+
+            if (taskData.AssignedPerson != null)
+                await AssignTask(task.Id, (int)taskData.AssignedPerson);
+
             return new RequestResponseDto { Key = task.Id, Data = task };
         }
 

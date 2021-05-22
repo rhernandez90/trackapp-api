@@ -29,7 +29,7 @@ namespace WebApi.Controllers
             try
             {
                 var task = await _tasksService.Create(taskData);
-                return Ok(task);
+                return Ok();
             }
             catch (Exception ex)
             {

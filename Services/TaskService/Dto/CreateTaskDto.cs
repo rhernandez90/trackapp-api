@@ -16,7 +16,6 @@ namespace WebApi.Services.TaskService.Dto
         public DateTime EndDate { get; set; }
         public String Note { get; set; }
         public int ProjectId { get; set; }
-
-
+        public int? AssignedPerson { get; set; }
     }
 }
