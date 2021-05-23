@@ -15,5 +15,6 @@ namespace WebApi.Services.ProjectService.Dto
         public int InprogressTasks { get; set; }
         public int DoneTasks { get; set; }
         public int RejectedTasks { get; set; }
+        public int OverdueTasks { get; set; }
     }
 }

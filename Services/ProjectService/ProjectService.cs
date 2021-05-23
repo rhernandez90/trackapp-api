@@ -54,6 +54,7 @@ namespace WebApi.Services.ProjectService
                     InprogressTasks= x.Tasks.Count(x => x.Status == StatusEnum.InProgress),
                     PendingTasks = x.Tasks.Count(x => x.Status == StatusEnum.Pending),
                     RejectedTasks = x.Tasks.Count(x => x.Status == StatusEnum.rejected),
+                    OverdueTasks = x.Tasks.Count(x => x.EndDate < DateTime.Now)
                 })
             .ToListAsync();
 
