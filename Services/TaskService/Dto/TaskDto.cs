@@ -17,12 +17,13 @@ namespace WebApi.Services.TaskService.Dto
         public string Description { get; set; }
 
         public StatusEnum Status { get; set; }
+        public string Statuslabel { get; set; }
 
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
 
-        public DateTime CompleteDate { get; set; }
+        public DateTime? CompleteDate { get; set; }
 
         public String Note { get; set; }
 

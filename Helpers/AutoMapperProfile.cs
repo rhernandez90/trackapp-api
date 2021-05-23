@@ -22,7 +22,8 @@ namespace WebApi.Helpers
 
             CreateMap<Tasks, TaskDto>()
                 .ForMember( dest => dest.ProjectName, src => src.MapFrom( x => x.Project.Name))
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember( x => x.Id, opt => opt.Ignore());
 
             //automapper for tasks
             CreateMap<Persons,PersonDto>()

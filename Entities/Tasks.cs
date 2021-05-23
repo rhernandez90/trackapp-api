@@ -23,7 +23,7 @@ namespace WebApi.Entities
    
         public DateTime EndDate { get; set; }
 
-        public DateTime CompleteDate { get; set; }
+        public DateTime? CompleteDate { get; set; }
 
         public String Note { get; set; }
 

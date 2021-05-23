@@ -81,6 +81,7 @@ namespace WebApi.Services.TaskService
                     s.Description,
                     s.TaskName,
                     s.Status,
+                    StatusLabel = s.Status.ToString(),
                     s.StartDate,
                     s.EndDate,
                     s.CompleteDate,
@@ -109,6 +110,7 @@ namespace WebApi.Services.TaskService
                     s.Description,
                     s.TaskName,
                     s.Status,
+                    StatusLabel = s.Status.ToString(),
                     s.StartDate,
                     s.EndDate,
                     s.CompleteDate,
@@ -131,7 +133,17 @@ namespace WebApi.Services.TaskService
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
             {
-                task = _mapper.Map<Tasks>(taskData);
+                task.TaskName = taskData.TaskName;
+                task.Description = taskData.Description;
+                task.StartDate = taskData.StartDate;
+                task.EndDate = taskData.EndDate;
+                task.Note = taskData.Note;
+                task.Status = taskData.Status;
+
+                if (taskData.Status == StatusEnum.Done && task.CompleteDate == null)
+                    task.CompleteDate = DateTime.UtcNow;
+                
+
                 _context.Tasks.Update(task);
                 await _context.SaveChangesAsync();
 
@@ -152,5 +164,7 @@ namespace WebApi.Services.TaskService
             await _context.SaveChangesAsync();
             return new RequestResponseDto { Key = personTask.Id, Data = personTask };
         }
+
+        
     }
 }
