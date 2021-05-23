@@ -11,5 +11,9 @@ namespace WebApi.Services.ProjectService.Dto
         public string Name { get; set; }
         public string Description { get; set; }
         public string BackgroundColor { get; set; }
+        public int PendingTasks { get; set; }
+        public int InprogressTasks { get; set; }
+        public int DoneTasks { get; set; }
+        public int RejectedTasks { get; set; }
     }
 }

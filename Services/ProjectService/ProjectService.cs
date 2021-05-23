@@ -5,18 +5,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
+using WebApi.Helpers.Enums;
 using WebApi.Services.ProjectService.Dto;
+using WebApi.Services.TaskService;
 
 namespace WebApi.Services.ProjectService
 {   
     public class ProjectService : IProjectService
     {
         private readonly DataContext _context;
+        private readonly ITaskService _taskService;
         public ProjectService(
-            DataContext context   
+            DataContext context,
+            ITaskService taskService
         )
         {
             _context = context;
+            _taskService = taskService;
         }
 
 
@@ -37,13 +42,19 @@ namespace WebApi.Services.ProjectService
 
         public async Task<RequestResponseDto> GetAll()
         {
-            var projects = await _context.Projects
+            var projects = await _context
+                .Projects
+                .Include(x => x.Tasks)
                 .Select( x => new ProjectDto {
                     Description = x.Description,
                     Name = x.Name,
                     Id = x.Id,
-                    BackgroundColor = x.BackgroundColor
-            })
+                    BackgroundColor = x.BackgroundColor,
+                    DoneTasks = x.Tasks.Count(x => x.Status == StatusEnum.Done),
+                    InprogressTasks= x.Tasks.Count(x => x.Status == StatusEnum.InProgress),
+                    PendingTasks = x.Tasks.Count(x => x.Status == StatusEnum.Pending),
+                    RejectedTasks = x.Tasks.Count(x => x.Status == StatusEnum.rejected),
+                })
             .ToListAsync();
 
             return new RequestResponseDto {  Data = projects };
@@ -87,6 +98,7 @@ namespace WebApi.Services.ProjectService
             }
             return null;
         }
+
 
 
     }
