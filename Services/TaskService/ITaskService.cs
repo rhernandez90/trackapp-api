@@ -12,6 +12,7 @@ namespace WebApi.Services.TaskService
     {
         Task<RequestResponseDto> Create(CreateTaskDto taksData);
         Task<RequestResponseDto> GetAll();
+        Task<RequestResponseDto> GetOverdueTasks(int ProjectId);
         Task<RequestResponseDto> GetById(int id);
         Task<RequestResponseDto> GetByProject(int id, StatusEnum status);
         Task<RequestResponseDto> GetAllByProject(int id);

@@ -256,7 +256,8 @@ namespace WebApi.Services.UserService
                 LastName = user.LastName,
                 Username = user.Username,
                 Token = tokenString,
-                Roles = string.Join(", ", roles)
+                Roles = string.Join(", ", roles),
+                FullName = $"{user.FirstName } {user.LastName}"
             };
 
             return userDto;
