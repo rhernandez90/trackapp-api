@@ -57,8 +57,8 @@ namespace WebApi.Controllers
             return Ok(task);
         }
 
-        [Authorize(Roles = "Role.Admin")]
-        [HttpGet("/Overdue/{Id}")]
+        [Authorize(Roles = "Role.Admin,Role.User")]
+        [HttpGet("Overdue/{Id}")]
         public async Task<ActionResult> GetOverdueTasks(int Id)
         {
             var tasks = await _tasksService.GetOverdueTasks(Id);

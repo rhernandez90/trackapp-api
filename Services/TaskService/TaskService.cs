@@ -64,9 +64,26 @@ namespace WebApi.Services.TaskService
         public async Task<RequestResponseDto> GetOverdueTasks(int ProjectId)
         {
             var tasks = _context.Tasks.Include(x => x.Project)
-                .Where(x => x.ProjectId == ProjectId && x.EndDate < DateTime.Now && x.Status != StatusEnum.Done);
-            var taskList = _mapper.Map<List<TaskDto>>(tasks);
-            return new RequestResponseDto { Data = taskList };
+                .Where(x => x.ProjectId == ProjectId && x.EndDate < DateTime.Now && x.Status != StatusEnum.Done)
+                .Select(s => new
+                {
+                    s.Id,
+                    s.Description,
+                    s.TaskName,
+                    s.Status,
+                    StatusLabel = s.Status.ToString(),
+                    IsOverdue = (s.EndDate < DateTime.Now && s.Status != StatusEnum.Done),
+                    s.StartDate,
+                    s.EndDate,
+                    s.CompleteDate,
+                    s.Note,
+                    persons = s.PersonTasks.Select(v => new
+                    {
+                        v.Id,
+                        Name = v.Person.FirstName + " " + v.Person.LastName
+                    })
+                });
+            return new RequestResponseDto { Data = tasks };
         }
 
         public async  Task<RequestResponseDto> GetById(int id)
